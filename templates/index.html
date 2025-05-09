@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Stock Search</h1>
+        <form>
+            <label for="ticker">Enter Stock Ticker Symbol <span class="required">*</span></label>
+            <input type="text" id="ticker" name="ticker" value="" required>
+            <div class="buttons">
+                <button type="button" onclick="searchStock()">Search</button>
+                <button type="button" onclick="clearResult()">Clear</button>
+            </div>
+        </form>
+        <!-- Add cache notice div -->
+        <div id="cacheNotice">
+            Results served from cache to improve the performace.
+        </div>
+    </div>
+    <hr>
+
+    <!-- Tabs Section: Initially Hidden -->
+    <div id="tab-section" class="hidden">
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('outlook')">Company Outlook</div>
+            <div class="tab" onclick="openTab('summary')">Stock Summary</div>
+            <div class="tab" onclick="openTab('history')">Search History</div>
+        </div>
+
+        <!-- Company Outlook Tab -->
+        <div class="tab-content active" id="outlook">
+            <table class="stock-table">
+                <tr>
+                    <td>Company Name</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Stock Ticker Symbol</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Exchange Code</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Start Date</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Description</td>
+                    <td>
+                        <p id="description-content"></p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Stock Summary Tab -->
+        <div class="tab-content" id="summary">
+            <table class="stock-table">
+                <tr>
+                    <td>Stock Ticker Symbol</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Trading Day</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Previous Closing Price</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Opening Price</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>High Price</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Low Price</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Last Price</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Change</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Change Percent</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Number of Shares Traded</td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Search History Tab -->
+        <div class="tab-content" id="history">
+            <table class="stock-table">
+                <tbody id="history-body">
+                    <!-- History rows will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message hidden">
+        Error: No record has been found, please enter a valid symbol.
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function openTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.tab[onclick="openTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // Load search history when history tab is selected
+            if (tabId === 'history') {
+                loadSearchHistory();
+            }
+        }
+
+        async function searchStock() {
+            const ticker = document.getElementById('ticker').value;
+            const errorBox = document.querySelector('.error-message');
+            const cacheNotice = document.getElementById('cacheNotice');
+
+            // Hide cache notice on new search
+            cacheNotice.classList.remove('show');
+
+            if (!ticker) {
+                alert("Please fill out the ticker symbol field.");
+                return;
+            }
+            try {
+                const response = await fetch(`/search?ticker=${encodeURIComponent(ticker)}`);
+                const data = await response.json();
+                console.log(data);
+
+                if (!data || !data.daily || !data.iex || !data.iex[0]) throw new Error("Invalid data");
+
+                // Show cache notice if data was served from cache
+                if (data.cached) {
+                    cacheNotice.classList.add('show');
+                }
+
+                errorBox.classList.add('hidden');
+                document.getElementById('tab-section').classList.remove('hidden');
+                openTab('outlook');
+
+                // Populate the Company Outlook data from backend
+                document.querySelector('#outlook .stock-table tr:nth-child(1) td:nth-child(2)').textContent = data.daily?.name || 'N/A';
+                document.querySelector('#outlook .stock-table tr:nth-child(2) td:nth-child(2)').textContent = data.daily?.ticker || 'N/A';
+                document.querySelector('#outlook .stock-table tr:nth-child(3) td:nth-child(2)').textContent = data.daily?.exchangeCode || 'N/A';
+                document.querySelector('#outlook .stock-table tr:nth-child(4) td:nth-child(2)').textContent = data.daily?.startDate || 'N/A';
+                // document.querySelector('#outlook .stock-table tr:nth-child(5) td:nth-child(2)').textContent = data.daily?.description || 'N/A';
+                document.getElementById('description-content').textContent = data.daily?.description || 'N/A';
+
+                // Populate the Stock Summary data from backend
+                const iex = data.iex[0];
+                document.querySelector('#summary .stock-table tr:nth-child(1) td:nth-child(2)').textContent = iex.ticker || 'N/A';
+                document.querySelector('#summary .stock-table tr:nth-child(2) td:nth-child(2)').textContent = iex.timestamp ? new Date(iex.timestamp).toISOString().split('T')[0] : 'N/A';
+                document.querySelector('#summary .stock-table tr:nth-child(3) td:nth-child(2)').textContent = iex.prevClose || 'N/A';
+                document.querySelector('#summary .stock-table tr:nth-child(4) td:nth-child(2)').textContent = iex.open || 'N/A';
+                document.querySelector('#summary .stock-table tr:nth-child(5) td:nth-child(2)').textContent = iex.high || 'N/A';
+                document.querySelector('#summary .stock-table tr:nth-child(6) td:nth-child(2)').textContent = iex.low || 'N/A';
+                document.querySelector('#summary .stock-table tr:nth-child(7) td:nth-child(2)').textContent = iex.last || 'N/A';
+                const lastPrice = iex.last;
+                const prevClose = iex.prevClose;
+                if (lastPrice === null || lastPrice === undefined) {
+                    document.querySelector('#summary .stock-table tr:nth-child(8) td:nth-child(2)').textContent = 'N/A';
+                    document.querySelector('#summary .stock-table tr:nth-child(9) td:nth-child(2)').textContent = 'N/A';
+                } else {
+                    const change = lastPrice - prevClose;
+                    const changePct = (change / prevClose) * 100;
+                    const upArrow = '<img src="../static/images/GreenArrowUp.png" alt="Up" style="width: 12px; vertical-align: middle;">';
+                    const downArrow = '<img src="../static/images/RedArrowDown.png" alt="Down" style="width: 12px; vertical-align: middle;">';
+                    document.querySelector('#summary .stock-table tr:nth-child(8) td:nth-child(2)').innerHTML =
+                        `${change.toFixed(2)} ${change >= 0 ? upArrow : downArrow}`;
+                    document.querySelector('#summary .stock-table tr:nth-child(9) td:nth-child(2)').innerHTML =
+                        `${changePct.toFixed(2)}% ${changePct >= 0 ? upArrow : downArrow}`;
+                }
+                document.querySelector('#summary .stock-table tr:nth-child(10) td:nth-child(2)').textContent = iex.volume || 'N/A';
+            } catch (error) {
+                // Show error message if no record is found
+                document.getElementById('tab-section').classList.add('hidden');
+                errorBox.classList.remove('hidden');
+                console.error(error);
+            }
+        }
+
+        function clearResult() {
+            document.getElementById('ticker').value = '';
+            document.querySelectorAll('.stock-table td:nth-child(2)').forEach(cell => {
+                if (cell.querySelector('#description-content')) {
+                    // If this cell contains the description element, just clear its text
+                    document.getElementById('description-content').textContent = '';
+                } else {
+                    // Otherwise clear normally
+                    cell.textContent = '';
+                }
+            });
+            document.getElementById('tab-section').classList.add('hidden');
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector('.error-message').classList.add('hidden');
+            document.getElementById('cacheNotice').classList.remove('show');
+        }
+
+        async function loadSearchHistory() {
+            try {
+                const response = await fetch('/history');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch search history');
+                }
+
+                const historyData = await response.json();
+                const historyBody = document.getElementById('history-body');
+
+                // Clear existing history
+                historyBody.innerHTML = '';
+
+                // Add each history item to the table
+                historyData.forEach(item => {
+                    const row = document.createElement('tr');
+                    const tickerCell = document.createElement('td');
+                    tickerCell.textContent = item.ticker;
+                    const timestampCell = document.createElement('td');
+
+                    // First, check if we have a valid timestamp
+                    if (item.timestamp) {
+                        try {
+                            // Replace SQLite format with ISO format if needed
+                            let timestamp = item.timestamp;
+
+                            // If the timestamp doesn't have 'T' or 'Z', convert it to ISO format
+                            if (!timestamp.includes('T')) {
+                                timestamp = timestamp.replace(' ', 'T') + 'Z';
+                            }
+
+                            const date = new Date(timestamp);
+
+                            // Make sure we got a valid date
+                            if (!isNaN(date.getTime())) {
+                                timestampCell.textContent = date.toLocaleString();
+                            } else {
+                                timestampCell.textContent = item.timestamp; // Fallback to raw timestamp
+                            }
+                        } catch (e) {
+                            console.error('Error parsing date:', e);
+                            timestampCell.textContent = item.timestamp; // Fallback to raw timestamp
+                        }
+                    } else {
+                        timestampCell.textContent = 'N/A';
+                    }
+
+                    row.appendChild(tickerCell);
+                    row.appendChild(timestampCell);
+                    historyBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading search history:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>

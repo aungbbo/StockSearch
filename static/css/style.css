@@ -1,0 +1,170 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #8060d7;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    background-color: white;
+    width: 800px;
+    margin: 50px auto 30px;
+    padding: 50px 0 25px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    font-size: 26px;
+}
+
+hr {
+    width: 800px;
+}
+
+label {
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+.required {
+    color: red;
+}
+
+input[type="text"] {
+    padding: 8px;
+    width: 200px;
+    font-size: 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.buttons {
+    margin-top: 30px;
+}
+
+button {
+    padding: 5px 20px;
+    font-size: 14px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: white;
+    transition: border 0.2s ease;
+}
+
+button:hover {
+    border: 1px solid black;
+}
+
+.tabs {
+    display: flex;
+    justify-content: flex-start;
+    margin: 30px auto;
+    width: 800px;
+    background-color: white;
+    overflow: hidden;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px 25px;
+    text-align: center;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    flex: 0 0 auto;
+}
+
+.tab:last-child {
+    border-right: none;
+}
+
+.tab.active {
+    background-color: #dddddd;
+}
+
+.tab-content {
+    display: none;
+    width: 800px;
+    margin: 0 auto;
+    font-size: 14px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.stock-table {
+    width: 100%;
+    background-color: white;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    border: 1px solid #ccc;
+}
+
+.stock-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.stock-table td:first-child {
+    width: 300px;
+    font-weight: bold;
+    background-color: #ececec;
+}
+
+.stock-table td:last-child {
+    width: calc(100% - 300px);
+    word-break: break-word;
+    text-align: center;
+}
+
+#description-content {
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    -webkit-box-orient: vertical;  
+    overflow: hidden;
+    width: 100%; 
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+#history-body {
+    text-align: center;
+}
+
+.error-message {
+    background-color: #8060d7;
+    color: black;
+    text-align: center;
+    padding: 15px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 20px;
+    display: block;
+}
+
+#cacheNotice {
+    color: #0066cc;
+    padding-top: 20px;
+    border-radius: 4px;
+    font-size: 10px;
+    height: 20px;
+    visibility: hidden;
+}
+
+#cacheNotice.show {
+    visibility: visible;
+}
+
+.hidden {
+    display: none;
+}
+
