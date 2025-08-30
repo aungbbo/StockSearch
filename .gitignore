@@ -6,7 +6,7 @@ __pycache__/
 *.pyd
 
 # SQLite database
-search_history.db
+*.db
 
 # VSCode/IDE files
 .vscode/
