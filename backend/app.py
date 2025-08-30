@@ -7,7 +7,11 @@ import os
 import json
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="../frontend/templates",
+    static_folder="../frontend/static",
+)
 
 # Database setup
 DB_PATH = os.path.join(os.path.dirname(__file__), "search_history.db")

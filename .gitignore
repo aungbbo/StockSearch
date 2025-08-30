@@ -1,3 +1,20 @@
-# Ignore SQLite database
-*.db
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite database
+search_history.db
+
+# VSCode/IDE files
+.vscode/
+.idea/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
